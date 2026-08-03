@@ -1,0 +1,63 @@
+import { NavLink } from 'react-router-dom';
+import { BookOpen, Timer, NotebookPen, Users, Image, DoorOpen, Coins, LogOut } from 'lucide-react';
+import { useAuth } from '../lib/auth';
+
+const links = [
+  { to: '/', label: 'Solo Study', icon: BookOpen },
+  { to: '/pomodoro', label: 'Pomodoro', icon: Timer },
+  { to: '/notes', label: 'Notes', icon: NotebookPen },
+  { to: '/rooms', label: 'Group Study', icon: Users },
+  { to: '/social', label: 'Social', icon: Image },
+  { to: '/profile', label: 'Profile Room', icon: DoorOpen },
+];
+
+export default function Sidebar() {
+  const { user, logout } = useAuth();
+
+  return (
+    <aside className="w-64 shrink-0 border-r border-ink/10 bg-white/60 p-6 flex flex-col">
+      <div className="mb-10 flex items-center gap-2">
+        <BookOpen className="h-6 w-6 text-clay" strokeWidth={2} />
+        <span className="font-display text-lg font-semibold tracking-tight">EduClass Mingle</span>
+      </div>
+
+      <nav className="flex flex-col gap-1">
+        {links.map(({ to, label, icon: Icon }) => (
+          <NavLink
+            key={to}
+            to={to}
+            end={to === '/'}
+            className={({ isActive }) =>
+              `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                isActive ? 'bg-moss/10 text-moss' : 'text-ink/70 hover:bg-ink/5 hover:text-ink'
+              }`
+            }
+          >
+            <Icon className="h-4 w-4" strokeWidth={2} />
+            {label}
+          </NavLink>
+        ))}
+      </nav>
+
+      <div className="mt-auto space-y-3">
+        <div className="flex items-center gap-2 rounded-lg bg-gold/15 px-3 py-2 text-sm font-medium text-gold">
+          <Coins className="h-4 w-4" strokeWidth={2} />
+          <span id="coin-balance">Coins</span>
+        </div>
+
+        <div className="rounded-lg border border-ink/10 px-3 py-2">
+          <p className="text-xs text-ink/40">Signed in as</p>
+          <p className="text-sm font-medium text-ink truncate">{user?.username}</p>
+        </div>
+
+        <button
+          onClick={logout}
+          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-ink/60 hover:bg-red-50 hover:text-red-600 transition-colors"
+        >
+          <LogOut className="h-4 w-4" strokeWidth={2} />
+          Sign out
+        </button>
+      </div>
+    </aside>
+  );
+}
