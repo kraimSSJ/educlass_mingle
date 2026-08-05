@@ -56,6 +56,7 @@ export default function RoomPage() {
   const localStreamRef = useRef<MediaStream | null>(null);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
+  const chatChannelRef = useRef<RealtimeChannel | null>(null);
   const peerConnections = useRef<Map<string, RTCPeerConnection>>(new Map());
   const remoteVideoRefs = useRef<Map<string, HTMLVideoElement | null>>(new Map());
 
@@ -82,37 +83,58 @@ export default function RoomPage() {
   useEffect(() => {
     if (!roomId) return;
 
+    fetch(`${API_URL}/rooms/${roomId}/messages`)
+      .then(r => r.json())
+      .then(body => {
+        const list = Array.isArray(body) ? body : Array.isArray(body?.data) ? body.data : [];
+        setMessages(list);
+      })
+      .catch(() => setMessages([]));
+
     const chatChannel = supabase.channel(`chat:${roomId}`)
       .on('broadcast', { event: 'message' }, ({ payload }) => {
-        setMessages(prev => [...prev, payload as ChatMessage]);
+        const incoming = payload as ChatMessage;
+        setMessages(prev => prev.some(msg => msg.id === incoming.id) ? prev : [...prev, incoming]);
       })
       .subscribe();
+    chatChannelRef.current = chatChannel;
 
-    return () => { supabase.removeChannel(chatChannel); };
+    return () => {
+      chatChannelRef.current = null;
+      supabase.removeChannel(chatChannel);
+    };
   }, [roomId]);
 
   useEffect(() => {
     chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const sendChatMessage = (text: string, type: ChatMessage['type'] = 'text', noteTitle?: string) => {
-    if (!text.trim() || !roomId) return;
-    const msg: ChatMessage = {
-      id: Math.random().toString(36).slice(2),
-      userId: user?.id ?? selfId.current,
-      username,
-      text,
-      type,
-      noteTitle,
-      timestamp: Date.now(),
-    };
-    supabase.channel(`chat:${roomId}`).send({
+  const sendChatMessage = async (text: string, type: ChatMessage['type'] = 'text', noteTitle?: string) => {
+    if (!text.trim() || !roomId || !user?.id) return;
+
+    const res = await fetch(`${API_URL}/rooms/${roomId}/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: user.id,
+        username,
+        text,
+        type,
+        noteTitle,
+      }),
+    });
+
+    const body = await res.json();
+    const msg = body?.data ?? body;
+    if (!msg?.id) return;
+
+    chatChannelRef.current?.send({
       type: 'broadcast',
       event: 'message',
       payload: msg,
     });
-    setMessages(prev => [...prev, msg]);
-    setChatText('');
+    setMessages(prev => prev.some(item => item.id === msg.id) ? prev : [...prev, msg]);
+    if (type === 'text') setChatText('');
   };
 
   // ── Share Notes / Summary modals ──────────────────────────────────

@@ -19,3 +19,15 @@ ALTER TABLE public.stories
 -- Add username to comments
 ALTER TABLE public.comments
   ADD COLUMN IF NOT EXISTS username text;
+
+-- Persist room chat history so messages survive leaving/rejoining rooms
+CREATE TABLE IF NOT EXISTS public.room_messages (
+  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  room_id uuid NOT NULL REFERENCES public.rooms(id) ON DELETE CASCADE,
+  user_id uuid NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  username text NOT NULL,
+  text text NOT NULL,
+  type text NOT NULL DEFAULT 'text' CHECK (type IN ('text', 'note', 'summary')),
+  note_title text,
+  created_at timestamptz NOT NULL DEFAULT now()
+);

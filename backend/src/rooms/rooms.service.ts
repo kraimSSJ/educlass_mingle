@@ -48,4 +48,58 @@ export class RoomsService {
       .select()
       .single();
   }
+
+  async listMessages(roomId: string) {
+    const { data, error } = await this.supabase.client
+      .from('room_messages')
+      .select('*')
+      .eq('room_id', roomId)
+      .order('created_at', { ascending: true });
+
+    return {
+      data: (data ?? []).map(this.toChatMessage),
+      error,
+    };
+  }
+
+  async createMessage(
+    roomId: string,
+    body: {
+      userId: string;
+      username: string;
+      text: string;
+      type?: 'text' | 'note' | 'summary';
+      noteTitle?: string;
+    },
+  ) {
+    const { data, error } = await this.supabase.client
+      .from('room_messages')
+      .insert({
+        room_id: roomId,
+        user_id: body.userId,
+        username: body.username,
+        text: body.text,
+        type: body.type ?? 'text',
+        note_title: body.noteTitle ?? null,
+      })
+      .select()
+      .single();
+
+    return {
+      data: data ? this.toChatMessage(data) : null,
+      error,
+    };
+  }
+
+  private toChatMessage(row: any) {
+    return {
+      id: row.id,
+      userId: row.user_id,
+      username: row.username,
+      text: row.text,
+      type: row.type,
+      noteTitle: row.note_title ?? undefined,
+      timestamp: new Date(row.created_at).getTime(),
+    };
+  }
 }

@@ -25,6 +25,25 @@ export class RoomsController {
     return this.roomsService.join(roomId, body.userId);
   }
 
+  @Get(':roomId/messages')
+  listMessages(@Param('roomId') roomId: string) {
+    return this.roomsService.listMessages(roomId);
+  }
+
+  @Post(':roomId/messages')
+  createMessage(
+    @Param('roomId') roomId: string,
+    @Body() body: {
+      userId: string;
+      username: string;
+      text: string;
+      type?: 'text' | 'note' | 'summary';
+      noteTitle?: string;
+    },
+  ) {
+    return this.roomsService.createMessage(roomId, body);
+  }
+
   @Post(':roomId/share-note')
   shareNote(@Param('roomId') roomId: string, @Body() body: { noteId: string; sharedBy: string }) {
     return this.roomsService.shareNote(roomId, body.noteId, body.sharedBy);

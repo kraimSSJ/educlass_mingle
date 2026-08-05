@@ -126,6 +126,17 @@ create table if not exists public.room_shared_summaries (
   shared_at timestamptz not null default now()
 );
 
+create table if not exists public.room_messages (
+  id uuid primary key default uuid_generate_v4(),
+  room_id uuid not null references public.rooms(id) on delete cascade,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  username text not null,
+  text text not null,
+  type text not null default 'text' check (type in ('text', 'note', 'summary')),
+  note_title text,
+  created_at timestamptz not null default now()
+);
+
 -- =========================================================
 -- 7. SOCIAL MEDIA SYSTEM
 -- =========================================================
