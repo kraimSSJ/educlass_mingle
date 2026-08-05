@@ -148,10 +148,10 @@ export default function Profile() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-parchment p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="flex flex-col h-full bg-parchment p-0 sm:p-6">
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
         <div>
-          <h1 className="text-3xl font-display font-bold text-ink">
+          <h1 className="text-2xl font-display font-bold text-ink sm:text-3xl">
             {isVisiting ? "Visiting Room" : "My Room"}
           </h1>
           <p className="text-ink/60 mt-1">
@@ -160,10 +160,10 @@ export default function Profile() {
         </div>
       </div>
 
-      <div className="flex gap-6 h-[calc(100vh-12rem)]">
+      <div className="flex flex-col gap-4 lg:h-[calc(100vh-12rem)] lg:flex-row lg:gap-6">
         {/* Main Canvas */}
         <div 
-          className="flex-1 rounded-2xl relative overflow-hidden shadow-xl border-4 border-ink/10 transition-all duration-500"
+          className="relative min-h-[420px] flex-1 overflow-hidden rounded-xl border-4 border-ink/10 shadow-xl transition-all duration-500 sm:min-h-[520px] lg:min-h-0 lg:rounded-2xl"
           style={{ background: BACKGROUNDS[background] }}
           ref={roomRef}
           onMouseMove={handleMouseMove}
@@ -175,13 +175,13 @@ export default function Profile() {
           )}
 
           {/* Profile Overlay */}
-          <div className="absolute top-6 left-6 w-80 bg-white/20 backdrop-blur-md border border-white/30 rounded-xl p-6 shadow-2xl z-10 text-white">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-16 h-16 rounded-full bg-moss/80 flex items-center justify-center text-2xl shadow-inner border-2 border-white/50 font-bold">
+          <div className="absolute left-3 right-3 top-3 z-10 rounded-xl border border-white/30 bg-white/20 p-4 text-white shadow-2xl backdrop-blur-md sm:left-6 sm:right-auto sm:top-6 sm:w-80 sm:p-6">
+            <div className="flex items-center gap-3 mb-3 sm:gap-4 sm:mb-4">
+              <div className="w-12 h-12 rounded-full bg-moss/80 flex items-center justify-center text-xl shadow-inner border-2 border-white/50 font-bold sm:h-16 sm:w-16 sm:text-2xl">
                 {user?.email?.[0].toUpperCase() || <UserIcon />}
               </div>
               <div>
-                <h2 className="font-display font-bold text-xl drop-shadow-md">
+                <h2 className="font-display font-bold text-lg drop-shadow-md sm:text-xl">
                   {user?.email?.split('@')[0] || 'Student'}
                 </h2>
                 <div className="flex items-center gap-1 text-sm bg-black/20 rounded-full px-2 py-0.5 mt-1 w-fit">
@@ -221,7 +221,7 @@ export default function Profile() {
           {elements.map((el) => (
             <div
               key={el.instanceId}
-              className={`absolute text-6xl select-none transition-transform duration-200 ${draggingId === el.instanceId ? 'scale-110 cursor-grabbing z-50' : 'cursor-grab hover:scale-105 z-20'} group`}
+              className={`absolute text-4xl select-none transition-transform duration-200 sm:text-6xl ${draggingId === el.instanceId ? 'scale-110 cursor-grabbing z-50' : 'cursor-grab hover:scale-105 z-20'} group`}
               style={{ left: `${el.x}%`, top: `${el.y}%`, textShadow: '0 10px 15px rgba(0,0,0,0.3)' }}
               onMouseDown={(e) => handleMouseDown(el.instanceId, e)}
             >
@@ -240,7 +240,7 @@ export default function Profile() {
 
         {/* Sidebar */}
         {!isVisiting && (
-          <div className="w-80 bg-white rounded-2xl shadow-sm border border-ink/10 flex flex-col overflow-hidden">
+          <div className="w-full bg-white rounded-xl shadow-sm border border-ink/10 flex flex-col overflow-hidden lg:w-80 lg:rounded-2xl">
             <div className="p-4 border-b border-ink/10 bg-parchment/50">
               <h3 className="font-bold text-ink mb-3 flex items-center gap-2">
                 <Grid size={18} />

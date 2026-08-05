@@ -77,16 +77,16 @@ export default function Rooms() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-8 animate-fade-in">
+    <div className="max-w-5xl mx-auto space-y-6 animate-fade-in sm:space-y-8">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-4xl font-display font-bold text-ink">Group Study Rooms</h1>
-          <p className="text-ink/60 mt-1 text-lg">Collaborate and learn together in real-time.</p>
+          <h1 className="text-3xl font-display font-bold text-ink sm:text-4xl">Group Study Rooms</h1>
+          <p className="text-ink/60 mt-1 text-base sm:text-lg">Collaborate and learn together in real-time.</p>
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 bg-moss hover:bg-moss/90 text-white px-5 py-3 rounded-xl font-medium transition-colors shadow-sm"
+          className="flex w-full items-center justify-center gap-2 bg-moss hover:bg-moss/90 text-white px-5 py-3 rounded-xl font-medium transition-colors shadow-sm sm:w-auto"
         >
           <Plus size={20} />
           Create Room
@@ -94,9 +94,9 @@ export default function Rooms() {
       </div>
 
       {/* Join By ID Section */}
-      <div className="bg-white border border-ink/10 rounded-2xl p-6 shadow-sm">
+      <div className="bg-white border border-ink/10 rounded-xl p-4 shadow-sm sm:p-6">
         <h2 className="text-lg font-bold text-ink mb-4">Join an existing room</h2>
-        <form onSubmit={handleJoinById} className="flex gap-3">
+        <form onSubmit={handleJoinById} className="flex flex-col gap-3 sm:flex-row">
           <input
             type="text"
             placeholder="Enter Room ID"
@@ -107,7 +107,7 @@ export default function Rooms() {
           <button
             type="submit"
             disabled={!joinId.trim()}
-            className="flex items-center gap-2 bg-ink text-white px-6 py-3 rounded-xl font-medium hover:bg-ink/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center justify-center gap-2 bg-ink text-white px-6 py-3 rounded-xl font-medium hover:bg-ink/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Join <ArrowRight size={18} />
           </button>
@@ -130,7 +130,7 @@ export default function Rooms() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {rooms.map(room => (
-              <div key={room.id} className="bg-white border border-ink/10 rounded-2xl p-6 flex flex-col hover:shadow-md transition-shadow">
+              <div key={room.id} className="bg-white border border-ink/10 rounded-xl p-4 flex flex-col hover:shadow-md transition-shadow sm:p-6">
                 <div className="flex-1 mb-6">
                   <h3 className="text-xl font-bold text-ink mb-2 truncate">{room.name}</h3>
                   <div className="flex items-center text-ink/60 text-sm gap-4">

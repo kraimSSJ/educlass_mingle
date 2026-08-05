@@ -55,10 +55,10 @@ export default function Dashboard() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <h1 className="font-display text-3xl font-semibold">Solo Study</h1>
+      <h1 className="font-display text-2xl font-semibold sm:text-3xl">Solo Study</h1>
       <p className="mt-2 text-ink/60">Create a module for each subject you're studying.</p>
 
-      <div className="mt-6 flex gap-2">
+      <div className="mt-6 flex flex-col gap-2 sm:flex-row">
         <input
           value={title}
           onChange={e => setTitle(e.target.value)}
@@ -69,7 +69,7 @@ export default function Dashboard() {
         <button
           onClick={createModule}
           disabled={!userId || creating}
-          className="flex items-center gap-2 rounded-lg bg-moss px-4 py-2 font-medium text-white disabled:opacity-50 hover:bg-moss/90 transition-colors"
+          className="flex items-center justify-center gap-2 rounded-lg bg-moss px-4 py-2 font-medium text-white disabled:opacity-50 hover:bg-moss/90 transition-colors"
         >
           {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" strokeWidth={2} />}
           Create module
@@ -81,7 +81,7 @@ export default function Dashboard() {
       ) : modules.length === 0 ? (
         <p className="mt-16 text-center text-ink/40 text-sm">No modules yet — create one above.</p>
       ) : (
-        <div className="mt-8 grid grid-cols-2 gap-4">
+        <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
           {modules.map(m => (
             <Link key={m.id} to={`/modules/${m.id}`} className="rounded-xl border border-ink/10 bg-white p-5 transition-shadow hover:shadow-md">
               <BookOpen className="h-5 w-5 text-clay" strokeWidth={2} />

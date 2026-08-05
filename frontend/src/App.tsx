@@ -28,7 +28,7 @@ export default function App() {
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <main className="min-w-0 flex-1 p-8">
+      <main className="min-w-0 flex-1 px-3 py-4 pb-24 sm:px-5 md:p-8">
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/modules/:moduleId" element={<ModulePage />} />
