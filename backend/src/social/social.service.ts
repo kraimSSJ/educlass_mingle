@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
 
 @Injectable()
@@ -7,6 +7,32 @@ export class SocialService {
 
   constructor(private readonly supabase: SupabaseService) {}
 
+  private async ensureSocialBucket() {
+    const { data: bucket, error: getErr } = await this.supabase.client.storage.getBucket('social-media');
+
+    if (!bucket && getErr) {
+      const { error: createErr } = await this.supabase.client.storage.createBucket('social-media', {
+        public: true,
+      });
+
+      if (createErr) {
+        throw new InternalServerErrorException(`Could not create social-media bucket: ${createErr.message}`);
+      }
+
+      return;
+    }
+
+    if (bucket && !bucket.public) {
+      const { error: updateErr } = await this.supabase.client.storage.updateBucket('social-media', {
+        public: true,
+      });
+
+      if (updateErr) {
+        throw new InternalServerErrorException(`Could not make social-media bucket public: ${updateErr.message}`);
+      }
+    }
+  }
+
   // Uploads an image buffer to the 'social-media' Storage bucket and returns
   // its public URL. Posts/stories previously stored the raw base64 image
   // directly in the DB row (image_url/media_url as `text`), which made every
@@ -14,23 +40,29 @@ export class SocialService {
   // image's full base64 data on every single load — the actual cause of
   // posts/stories taking a long time to show up. Now we store a short URL.
   private async uploadImage(buffer: Buffer, fileName: string, mimeType?: string): Promise<string> {
-    try {
-      const storageKey = `social/${Date.now()}_${fileName}`;
-      const { error: uploadErr } = await this.supabase.client.storage
-        .from('social-media')
-        .upload(storageKey, buffer, { contentType: mimeType || 'image/jpeg', upsert: true });
-
-      if (uploadErr) {
-        this.logger.warn(`Storage upload failed: ${uploadErr.message}`);
-        return '';
-      }
-
-      const { data } = this.supabase.client.storage.from('social-media').getPublicUrl(storageKey);
-      return data.publicUrl;
-    } catch (e: any) {
-      this.logger.warn(`Storage upload error: ${e.message}`);
-      return '';
+    if (mimeType && !mimeType.startsWith('image/')) {
+      throw new BadRequestException('Social uploads must be image files.');
     }
+
+    await this.ensureSocialBucket();
+
+    const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const storageKey = `social/${Date.now()}_${safeName}`;
+    const { error: uploadErr } = await this.supabase.client.storage
+      .from('social-media')
+      .upload(storageKey, buffer, { contentType: mimeType || 'image/jpeg', upsert: true });
+
+    if (uploadErr) {
+      this.logger.warn(`Storage upload failed: ${uploadErr.message}`);
+      throw new InternalServerErrorException(`Social image upload failed: ${uploadErr.message}`);
+    }
+
+    const { data } = this.supabase.client.storage.from('social-media').getPublicUrl(storageKey);
+    if (!data.publicUrl) {
+      throw new InternalServerErrorException('Social image upload did not return a public URL.');
+    }
+
+    return data.publicUrl;
   }
 
   // Creates a post. Stores content + image_url directly on the posts table.
@@ -117,6 +149,10 @@ export class SocialService {
   // Accepts an uploaded file — uploads it to Storage first so only a short
   // URL ever lands in the stories table.
   async addStoryWithImage(userId: string, file: Express.Multer.File, username?: string) {
+    if (!file) {
+      throw new BadRequestException('Story image is required.');
+    }
+
     const imageUrl = await this.uploadImage(file.buffer, file.originalname, file.mimetype);
     return this.addStory(userId, imageUrl, username);
   }

@@ -15,7 +15,7 @@ export default function Sidebar() {
   const { user, logout } = useAuth();
 
   return (
-    <aside className="w-64 shrink-0 border-r border-ink/10 bg-white/60 p-6 flex flex-col">
+    <aside className="sticky top-0 h-screen w-64 min-w-64 max-w-64 shrink-0 overflow-y-auto border-r border-ink/10 bg-white/60 p-6 flex flex-col">
       <div className="mb-10 flex items-center gap-2">
         <BookOpen className="h-6 w-6 text-clay" strokeWidth={2} />
         <span className="font-display text-lg font-semibold tracking-tight">EduClass Mingle</span>

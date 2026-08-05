@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { SocialService } from './social.service';
 
 @Controller('social')
@@ -15,6 +16,21 @@ export class SocialController {
   }) {
     const text = body.content ?? body.caption ?? '';
     return this.socialService.createPost(body.userId, text, body.imageUrl, body.username);
+  }
+
+  @Post('posts/upload')
+  @UseInterceptors(FileInterceptor('file'))
+  createPostUpload(
+    @UploadedFile() file: Express.Multer.File | undefined,
+    @Body() body: {
+      userId: string;
+      content?: string;
+      caption?: string;
+      username?: string;
+    },
+  ) {
+    const text = body.content ?? body.caption ?? '';
+    return this.socialService.createPostWithImage(body.userId, text, file, body.username);
   }
 
   @Get('feed')
@@ -46,6 +62,15 @@ export class SocialController {
   }) {
     const url = body.imageUrl ?? body.mediaUrl ?? '';
     return this.socialService.addStory(body.userId, url, body.username);
+  }
+
+  @Post('stories/upload')
+  @UseInterceptors(FileInterceptor('file'))
+  addStoryUpload(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() body: { userId: string; username?: string },
+  ) {
+    return this.socialService.addStoryWithImage(body.userId, file, body.username);
   }
 
   @Get('stories')

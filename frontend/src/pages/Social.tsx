@@ -200,7 +200,7 @@ export default function Social() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 pb-20 animate-fade-in">
+    <div className="max-w-3xl mx-auto space-y-5 pb-20 animate-fade-in">
       
       {/* Stories Bar */}
       <div className="bg-white border border-ink/10 rounded-2xl p-4 shadow-sm overflow-hidden">
@@ -363,6 +363,10 @@ export default function Social() {
 function PostCard({ post, onAddComment }: { post: Post, onAddComment: (id: string, text: string) => void }) {
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState('');
+  const [expanded, setExpanded] = useState(false);
+  const postText = post.content ?? post.caption ?? '';
+  const isLongPost = postText.length > 260;
+  const visibleText = !expanded && isLongPost ? `${postText.slice(0, 260).trim()}...` : postText;
   
   const submitComment = (e: React.FormEvent) => {
     e.preventDefault();
@@ -371,8 +375,8 @@ function PostCard({ post, onAddComment }: { post: Post, onAddComment: (id: strin
   };
 
   return (
-    <div className="bg-white border border-ink/10 rounded-2xl shadow-sm overflow-hidden animate-fade-in-up">
-      <div className="p-4 flex items-center gap-3">
+    <div className="bg-white border border-ink/10 rounded-xl shadow-sm overflow-hidden animate-fade-in-up">
+      <div className="px-4 py-3 flex items-center gap-3">
         <div className="w-10 h-10 rounded-full bg-clay/20 text-clay flex items-center justify-center font-bold uppercase">
           {(post.username ?? 'U').substring(0,2)}
         </div>
@@ -383,18 +387,27 @@ function PostCard({ post, onAddComment }: { post: Post, onAddComment: (id: strin
       </div>
       
       {(post.image_url) && (
-        <div className="w-full aspect-[4/5] bg-ink/5 overflow-hidden">
-          <img src={post.image_url} alt="Post content" className="w-full h-full object-cover" />
+        <div className="w-full bg-ink/5 overflow-hidden flex items-center justify-center max-h-[520px]">
+          <img src={post.image_url} alt="Post content" className="w-full max-h-[520px] object-contain" />
         </div>
       )}
       
-      {(post.content || post.caption) && (
-        <div className="p-4 text-ink">
-          <p className="whitespace-pre-wrap">{post.content ?? post.caption}</p>
+      {postText && (
+        <div className="px-4 py-3 text-ink">
+          <p className="whitespace-pre-wrap leading-relaxed">{visibleText}</p>
+          {isLongPost && (
+            <button
+              type="button"
+              onClick={() => setExpanded(prev => !prev)}
+              className="mt-1 text-sm font-medium text-ink/55 hover:text-ink"
+            >
+              {expanded ? 'Show less' : 'See more'}
+            </button>
+          )}
         </div>
       )}
       
-      <div className="p-4 border-t border-ink/5 flex gap-4">
+      <div className="px-4 py-3 border-t border-ink/5 flex gap-4">
         <button className="flex items-center gap-2 text-ink/60 hover:text-clay transition-colors">
           <Heart size={20} />
           <span className="text-sm font-medium">{post.likes || 0}</span>
