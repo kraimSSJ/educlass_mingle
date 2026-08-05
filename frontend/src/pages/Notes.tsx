@@ -195,12 +195,12 @@ export default function Notes() {
   };
 
   return (
-    <div className="flex h-screen bg-[#FAFAFA] text-[#2F3E46] overflow-hidden font-sans">
+    <div className="flex flex-col bg-[#FAFAFA] text-[#2F3E46] font-sans md:h-screen md:flex-row md:overflow-hidden">
       
       {/* Sidebar - Notes List */}
-      <div className="w-80 bg-white border-r border-[#E0E0E0] flex flex-col z-10 shadow-[4px_0_15px_rgba(0,0,0,0.03)]">
-        <div className="p-6 border-b border-[#E0E0E0] bg-[#F4F1DE] flex justify-between items-center">
-          <h2 className="text-2xl font-display font-bold text-[#3D405B]">My Notes</h2>
+      <div className="w-full bg-white border-b border-[#E0E0E0] flex flex-col z-10 shadow-[4px_0_15px_rgba(0,0,0,0.03)] md:h-full md:w-80 md:border-b-0 md:border-r">
+        <div className="p-4 border-b border-[#E0E0E0] bg-[#F4F1DE] flex justify-between items-center md:p-6">
+          <h2 className="text-xl font-display font-bold text-[#3D405B] md:text-2xl">My Notes</h2>
           <button 
             onClick={createNote}
             className="p-2 bg-[#E07A5F] text-white rounded-lg hover:bg-[#D46A50] shadow-md transition-colors"
@@ -209,7 +209,7 @@ export default function Notes() {
           </button>
         </div>
         
-        <div className="p-4 border-b border-[#E0E0E0]">
+        <div className="p-3 border-b border-[#E0E0E0] md:p-4">
           <div className="relative">
             <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
             <input 
@@ -220,20 +220,20 @@ export default function Notes() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-2">
+        <div className="flex max-h-48 gap-2 overflow-x-auto p-2 md:max-h-none md:flex-1 md:flex-col md:overflow-x-visible md:overflow-y-auto">
           {notes.map(note => {
             const mod = modules.find(m => m.id === note.moduleId);
             return (
               <div 
                 key={note.id}
                 onClick={() => selectNote(note)}
-                className={`p-4 mb-2 rounded-xl cursor-pointer transition-all duration-200 border ${
+                className={`min-w-56 p-3 rounded-xl cursor-pointer transition-all duration-200 border md:mb-2 md:min-w-0 md:p-4 ${
                   activeNoteId === note.id 
                     ? 'bg-[#F4F1DE] border-[#E07A5F] shadow-sm' 
                     : 'bg-white border-transparent hover:bg-gray-50 hover:border-gray-200'
                 }`}
               >
-                <div className="font-semibold text-lg mb-1 truncate">{note.title || 'Untitled Note'}</div>
+                <div className="font-semibold text-base mb-1 truncate md:text-lg">{note.title || 'Untitled Note'}</div>
                 <div className="flex justify-between items-center mt-2">
                   {mod ? (
                     <span className="text-xs px-2 py-1 rounded-md bg-[#81B29A] text-white font-medium">
@@ -255,13 +255,13 @@ export default function Notes() {
       </div>
 
       {/* Main Area - Notebook Editor */}
-      <div className="flex-1 bg-[#EBEBEB] relative overflow-y-auto flex justify-center py-12 px-8">
+      <div className="flex-1 bg-[#EBEBEB] relative overflow-y-auto flex justify-center px-0 py-0 md:py-12 md:px-8">
         
         {/* The Notebook */}
-        <div className="w-full max-w-4xl bg-[#FFFCF5] min-h-[1056px] shadow-[15px_15px_30px_rgba(0,0,0,0.1)] relative rounded-r-2xl rounded-l-md border border-gray-200">
+        <div className="w-full bg-[#FFFCF5] min-h-[calc(100vh-16rem)] relative border-gray-200 md:max-w-4xl md:min-h-[1056px] md:rounded-r-2xl md:rounded-l-md md:border md:shadow-[15px_15px_30px_rgba(0,0,0,0.1)]">
           
           {/* Spiral Binding Effect */}
-          <div className="absolute left-0 top-0 bottom-0 w-6 flex flex-col justify-evenly items-center py-8 bg-[#EBEBEB] border-r border-[#D4D4D4] z-20 rounded-l-md shadow-[inset_-2px_0_4px_rgba(0,0,0,0.05)]">
+          <div className="absolute left-0 top-0 bottom-0 hidden w-6 flex-col justify-evenly items-center py-8 bg-[#EBEBEB] border-r border-[#D4D4D4] z-20 rounded-l-md shadow-[inset_-2px_0_4px_rgba(0,0,0,0.05)] md:flex">
             {Array.from({ length: 30 }).map((_, i) => (
               <div key={i} className="relative w-4 h-4">
                 <div className="w-4 h-4 rounded-full bg-[#333] shadow-inner absolute z-10" />
@@ -271,11 +271,11 @@ export default function Notes() {
           </div>
 
           {/* Red Margin Line */}
-          <div className="absolute left-20 top-0 bottom-0 w-[2px] bg-[#E07A5F] opacity-40 z-10" />
+          <div className="absolute left-20 top-0 bottom-0 hidden w-[2px] bg-[#E07A5F] opacity-40 z-10 md:block" />
 
           {/* Notebook Lines Background */}
-          <div 
-            className="absolute inset-0 z-0 pointer-events-none mt-40"
+          <div
+            className="absolute inset-0 z-0 pointer-events-none mt-48 md:mt-40"
             style={{
               backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, rgba(129, 178, 154, 0.2) 31px, rgba(129, 178, 154, 0.2) 32px)',
               backgroundSize: '100% 32px'
@@ -283,17 +283,17 @@ export default function Notes() {
           />
 
           {/* Header & Toolbar Area */}
-          <div className="pl-28 pr-12 pt-12 pb-6 relative z-20 bg-[#FFFCF5] rounded-tr-2xl">
+          <div className="relative z-20 bg-[#FFFCF5] px-4 pb-4 pt-5 md:rounded-tr-2xl md:pl-28 md:pr-12 md:pt-12 md:pb-6">
             
-            <div className="flex justify-between items-start mb-6">
+            <div className="flex flex-col gap-3 mb-4 md:mb-6 md:flex-row md:items-start md:justify-between">
               <input
                 type="text"
                 value={title}
                 onChange={handleTitleChange}
-                className="text-4xl font-display font-bold text-[#3D405B] bg-transparent border-none focus:outline-none w-2/3"
+                className="w-full text-2xl font-display font-bold text-[#3D405B] bg-transparent border-none focus:outline-none md:w-2/3 md:text-4xl"
                 placeholder="Note Title..."
               />
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2 md:gap-3">
                 <span className={`text-sm flex items-center gap-1 transition-opacity duration-300 ${isSaving ? 'opacity-100 text-[#E07A5F]' : 'opacity-50 text-gray-500'}`}>
                   <Save size={16} /> {isSaving ? 'Saving...' : 'Saved'}
                 </span>
@@ -309,7 +309,7 @@ export default function Notes() {
             </div>
 
             {/* Formatting Toolbar */}
-            <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-100 sticky top-4">
+            <div className="sticky top-2 flex items-center gap-1 overflow-x-auto rounded-xl border border-gray-100 bg-white px-2 py-2 shadow-sm md:top-4 md:gap-2 md:px-4">
               <button onClick={() => formatText('bold')} className="p-2 hover:bg-gray-100 rounded-lg text-gray-700" title="Bold"><Bold size={18} /></button>
               <button onClick={() => formatText('italic')} className="p-2 hover:bg-gray-100 rounded-lg text-gray-700" title="Italic"><Italic size={18} /></button>
               <div className="w-px h-6 bg-gray-200 mx-1" />
@@ -327,7 +327,7 @@ export default function Notes() {
           {/* Editor Area */}
           <div 
             ref={editorRef}
-            className="pl-28 pr-12 pb-24 outline-none relative z-10 min-h-[800px] text-lg leading-[32px] text-[#3D405B]"
+            className="relative z-10 min-h-[420px] px-4 pb-24 text-base leading-[32px] text-[#3D405B] outline-none md:min-h-[800px] md:pl-28 md:pr-12 md:text-lg"
             contentEditable
             onInput={handleEditorInput}
             style={{
@@ -336,7 +336,7 @@ export default function Notes() {
           />
           
           {/* Page Number */}
-          <div className="absolute bottom-6 right-10 text-gray-400 font-serif z-10">
+          <div className="absolute bottom-6 right-5 text-gray-400 font-serif z-10 md:right-10">
             pg. {activeNoteId ? notes.findIndex(n => n.id === activeNoteId) + 1 : 1}
           </div>
 
@@ -344,7 +344,7 @@ export default function Notes() {
           {stickies.map(sticky => (
             <div 
               key={sticky.id}
-              className="absolute w-48 min-h-48 shadow-lg p-4 rounded-br-2xl transform rotate-1 cursor-move transition-transform hover:scale-105 hover:z-50 z-30"
+              className="absolute w-40 min-h-40 shadow-lg p-4 rounded-br-2xl transform rotate-1 cursor-move transition-transform hover:scale-105 hover:z-50 z-30 md:w-48 md:min-h-48"
               style={{
                 backgroundColor: sticky.color,
                 left: `${sticky.x}px`,
