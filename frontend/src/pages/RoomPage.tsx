@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   PhoneCall, PhoneOff, Mic, MicOff, VideoOff, Video,
-  NotebookPen, FileText, Copy, Check, Send, X, ArrowLeft
+  NotebookPen, FileText, Copy, Check, Send, X, ArrowLeft, Paperclip, Image as ImageIcon
 } from 'lucide-react';
 import { supabase, API_URL } from '../lib/supabaseClient';
 import { useAuth } from '../lib/auth';
@@ -19,6 +19,9 @@ interface ChatMessage {
   text: string;
   type: 'text' | 'note' | 'summary';
   noteTitle?: string;
+  attachmentUrl?: string;
+  attachmentName?: string;
+  attachmentType?: 'image' | 'pdf';
   timestamp: number;
 }
 
@@ -43,7 +46,10 @@ export default function RoomPage() {
   // Chat
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [chatText, setChatText] = useState('');
+  const [uploadingAttachment, setUploadingAttachment] = useState(false);
+  const [viewingImage, setViewingImage] = useState<{ url: string; name: string } | null>(null);
   const chatBottomRef = useRef<HTMLDivElement>(null);
+  const attachmentInputRef = useRef<HTMLInputElement>(null);
 
   // Share modals
   const [showNoteModal, setShowNoteModal] = useState(false);
@@ -135,6 +141,44 @@ export default function RoomPage() {
     });
     setMessages(prev => prev.some(item => item.id === msg.id) ? prev : [...prev, msg]);
     if (type === 'text') setChatText('');
+  };
+
+  const sendAttachmentMessage = async (file: File) => {
+    if (!roomId || !user?.id || uploadingAttachment) return;
+    setUploadingAttachment(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('userId', user.id);
+      formData.append('username', username);
+      formData.append('text', chatText.trim() || file.name);
+      formData.append('file', file);
+
+      const res = await fetch(`${API_URL}/rooms/${roomId}/messages/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+      const body = await res.json();
+      const msg = body?.data ?? body;
+      if (!msg?.id) return;
+
+      chatChannelRef.current?.send({
+        type: 'broadcast',
+        event: 'message',
+        payload: msg,
+      });
+      setMessages(prev => prev.some(item => item.id === msg.id) ? prev : [...prev, msg]);
+      setChatText('');
+    } finally {
+      setUploadingAttachment(false);
+      if (attachmentInputRef.current) attachmentInputRef.current.value = '';
+    }
+  };
+
+  const handleAttachmentSelect = (e: { target: HTMLInputElement }) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    sendAttachmentMessage(file);
   };
 
   // ── Share Notes / Summary modals ──────────────────────────────────
@@ -346,7 +390,10 @@ export default function RoomPage() {
                   {!isMe && <span className="text-xs text-ink/40 mb-1 ml-1">{msg.username}</span>}
                   {msg.type === 'text' ? (
                     <div className={`max-w-[88%] break-words rounded-2xl px-3 py-2 text-sm md:max-w-[80%] ${isMe ? 'bg-moss text-white rounded-tr-sm' : 'bg-ink/5 text-ink rounded-tl-sm'}`}>
-                      {msg.text}
+                      {msg.attachmentUrl && (
+                        <AttachmentPreview message={msg} isMe={isMe} onOpenImage={setViewingImage} />
+                      )}
+                      {msg.text && <p className={msg.attachmentUrl ? 'mt-2' : ''}>{msg.text}</p>}
                     </div>
                   ) : (
                     <div className={`max-w-[92%] break-words rounded-xl border p-3 text-sm md:max-w-[90%] ${msg.type === 'note' ? 'border-clay/30 bg-clay/5' : 'border-moss/30 bg-moss/5'}`}>
@@ -367,10 +414,26 @@ export default function RoomPage() {
 
           <div className="flex gap-2 border-t border-ink/10 p-3">
             <input
+              ref={attachmentInputRef}
+              type="file"
+              hidden
+              accept="image/*,application/pdf"
+              onChange={handleAttachmentSelect}
+            />
+            <button
+              type="button"
+              onClick={() => attachmentInputRef.current?.click()}
+              disabled={uploadingAttachment}
+              className="rounded-xl border border-ink/10 bg-white p-2 text-ink/60 hover:bg-ink/5 hover:text-ink transition-colors disabled:opacity-40"
+              title="Attach image or PDF"
+            >
+              <Paperclip className="h-4 w-4" strokeWidth={2} />
+            </button>
+            <input
               value={chatText}
               onChange={e => setChatText(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(chatText); } }}
-              placeholder="Message..."
+              placeholder={uploadingAttachment ? 'Uploading attachment...' : 'Message...'}
               className="flex-1 rounded-xl border border-ink/10 bg-parchment px-3 py-2 text-sm outline-none focus:border-moss"
             />
             <button onClick={() => sendChatMessage(chatText)} disabled={!chatText.trim()}
@@ -424,6 +487,62 @@ export default function RoomPage() {
           </div>
         </div>
       )}
+
+      {viewingImage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 backdrop-blur-sm sm:p-6">
+          <button
+            type="button"
+            onClick={() => setViewingImage(null)}
+            className="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
+            aria-label="Close image"
+          >
+            <X className="h-6 w-6" strokeWidth={2} />
+          </button>
+          <img
+            src={viewingImage.url}
+            alt={viewingImage.name}
+            className="max-h-full max-w-full rounded-xl object-contain shadow-2xl"
+          />
+        </div>
+      )}
     </div>
+  );
+}
+
+function AttachmentPreview({
+  message,
+  isMe,
+  onOpenImage,
+}: {
+  message: ChatMessage;
+  isMe: boolean;
+  onOpenImage: (image: { url: string; name: string }) => void;
+}) {
+  if (!message.attachmentUrl) return null;
+
+  if (message.attachmentType === 'image') {
+    return (
+      <button
+        type="button"
+        onClick={() => onOpenImage({ url: message.attachmentUrl!, name: message.attachmentName ?? 'Chat image' })}
+        className="block w-full overflow-hidden rounded-xl bg-black/10"
+      >
+        <img src={message.attachmentUrl} alt={message.attachmentName ?? 'Chat attachment'} className="max-h-56 w-full object-contain" />
+      </button>
+    );
+  }
+
+  return (
+    <a
+      href={message.attachmentUrl}
+      target="_blank"
+      rel="noreferrer"
+      className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-sm ${
+        isMe ? 'border-white/30 bg-white/15 text-white' : 'border-ink/10 bg-white text-ink'
+      }`}
+    >
+      {message.attachmentType === 'pdf' ? <FileText className="h-4 w-4 shrink-0" strokeWidth={2} /> : <ImageIcon className="h-4 w-4 shrink-0" strokeWidth={2} />}
+      <span className="truncate">{message.attachmentName ?? 'Attachment'}</span>
+    </a>
   );
 }

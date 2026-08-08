@@ -134,6 +134,9 @@ create table if not exists public.room_messages (
   text text not null,
   type text not null default 'text' check (type in ('text', 'note', 'summary')),
   note_title text,
+  attachment_url text,
+  attachment_name text,
+  attachment_type text check (attachment_type is null or attachment_type in ('image', 'pdf')),
   created_at timestamptz not null default now()
 );
 

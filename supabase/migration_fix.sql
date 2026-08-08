@@ -31,3 +31,8 @@ CREATE TABLE IF NOT EXISTS public.room_messages (
   note_title text,
   created_at timestamptz NOT NULL DEFAULT now()
 );
+
+ALTER TABLE public.room_messages
+  ADD COLUMN IF NOT EXISTS attachment_url text,
+  ADD COLUMN IF NOT EXISTS attachment_name text,
+  ADD COLUMN IF NOT EXISTS attachment_type text CHECK (attachment_type IS NULL OR attachment_type IN ('image', 'pdf'));
