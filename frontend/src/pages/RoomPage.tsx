@@ -257,30 +257,31 @@ export default function RoomPage() {
 
   // ── Render ───────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col h-screen max-h-screen overflow-hidden bg-parchment">
+    <div className="flex min-h-[calc(100vh-8rem)] flex-col overflow-hidden rounded-xl bg-parchment border border-ink/10 md:h-[calc(100vh-4rem)] md:max-h-[calc(100vh-4rem)]">
       {/* Top bar */}
-      <header className="flex items-center justify-between gap-3 border-b border-ink/10 bg-white px-5 py-3 shrink-0">
-        <div className="flex items-center gap-3">
+      <header className="flex shrink-0 items-center justify-between gap-2 border-b border-ink/10 bg-white px-3 py-3 sm:px-5">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <Link to="/rooms" className="text-ink/40 hover:text-ink transition-colors">
             <ArrowLeft className="h-5 w-5" strokeWidth={2} />
           </Link>
-          <div>
-            <h1 className="font-display text-lg font-semibold leading-tight">{roomName}</h1>
-            <p className="text-xs text-ink/40 font-mono">{roomId}</p>
+          <div className="min-w-0">
+            <h1 className="truncate font-display text-base font-semibold leading-tight sm:text-lg">{roomName}</h1>
+            <p className="truncate text-[10px] text-ink/40 font-mono sm:text-xs">{roomId}</p>
           </div>
         </div>
         <button onClick={copyLink}
-          className="flex items-center gap-2 rounded-lg border border-ink/15 px-3 py-1.5 text-sm font-medium hover:bg-ink/5 transition-colors">
+          className="flex shrink-0 items-center gap-1 rounded-lg border border-ink/15 px-2.5 py-1.5 text-xs font-medium hover:bg-ink/5 transition-colors sm:gap-2 sm:px-3 sm:text-sm">
           {copied ? <Check className="h-4 w-4 text-moss" strokeWidth={2} /> : <Copy className="h-4 w-4" strokeWidth={2} />}
-          {copied ? 'Copied!' : 'Share link'}
+          <span className="hidden sm:inline">{copied ? 'Copied!' : 'Share link'}</span>
+          <span className="sm:hidden">{copied ? 'Copied' : 'Share'}</span>
         </button>
       </header>
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-y-auto md:flex-row md:overflow-hidden">
         {/* LEFT — Video + controls */}
-        <div className="flex flex-col w-3/5 border-r border-ink/10 overflow-y-auto">
+        <div className="flex shrink-0 flex-col border-b border-ink/10 md:h-full md:w-3/5 md:border-b-0 md:border-r md:overflow-y-auto">
           {/* Video grid */}
-          <div className="p-4 grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-2 p-3 sm:grid-cols-2 sm:gap-3 sm:p-4">
             <div className="relative aspect-video bg-ink rounded-xl overflow-hidden">
               <video ref={localVideoRef} autoPlay muted playsInline className="h-full w-full object-cover" />
               <span className="absolute bottom-2 left-2 text-xs text-white bg-black/50 rounded px-1.5 py-0.5">You</span>
@@ -294,47 +295,47 @@ export default function RoomPage() {
           </div>
 
           {/* Call controls */}
-          <div className="px-4 pb-4 flex flex-wrap gap-2">
+          <div className="flex gap-2 overflow-x-auto px-3 pb-3 sm:px-4 sm:pb-4 md:flex-wrap md:overflow-x-visible">
             {!inCall ? (
-              <button onClick={joinCall} className="flex items-center gap-2 rounded-lg bg-moss px-4 py-2 text-sm font-medium text-white hover:bg-moss/90 transition-colors">
+              <button onClick={joinCall} className="flex shrink-0 items-center gap-2 rounded-lg bg-moss px-4 py-2 text-sm font-medium text-white hover:bg-moss/90 transition-colors">
                 <PhoneCall className="h-4 w-4" strokeWidth={2} /> Join call
               </button>
             ) : (
               <>
-                <button onClick={leaveCall} className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors">
+                <button onClick={leaveCall} className="flex shrink-0 items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors">
                   <PhoneOff className="h-4 w-4" strokeWidth={2} /> Leave
                 </button>
-                <button onClick={toggleMic} className="flex items-center gap-2 rounded-lg border border-ink/15 px-3 py-2 text-sm font-medium hover:bg-ink/5 transition-colors">
+                <button onClick={toggleMic} className="flex shrink-0 items-center gap-2 rounded-lg border border-ink/15 px-3 py-2 text-sm font-medium hover:bg-ink/5 transition-colors">
                   {micOn ? <Mic className="h-4 w-4" strokeWidth={2} /> : <MicOff className="h-4 w-4" strokeWidth={2} />}
                   {micOn ? 'Mute' : 'Unmute'}
                 </button>
-                <button onClick={toggleCam} className="flex items-center gap-2 rounded-lg border border-ink/15 px-3 py-2 text-sm font-medium hover:bg-ink/5 transition-colors">
+                <button onClick={toggleCam} className="flex shrink-0 items-center gap-2 rounded-lg border border-ink/15 px-3 py-2 text-sm font-medium hover:bg-ink/5 transition-colors">
                   {camOn ? <Video className="h-4 w-4" strokeWidth={2} /> : <VideoOff className="h-4 w-4" strokeWidth={2} />}
                   {camOn ? 'Stop cam' : 'Start cam'}
                 </button>
               </>
             )}
-            <button onClick={openNoteModal} className="flex items-center gap-2 rounded-lg border border-ink/15 px-3 py-2 text-sm font-medium hover:bg-ink/5 transition-colors">
+            <button onClick={openNoteModal} className="flex shrink-0 items-center gap-2 rounded-lg border border-ink/15 px-3 py-2 text-sm font-medium hover:bg-ink/5 transition-colors">
               <NotebookPen className="h-4 w-4" strokeWidth={2} /> Share note
             </button>
-            <button onClick={openSummaryModal} className="flex items-center gap-2 rounded-lg border border-ink/15 px-3 py-2 text-sm font-medium hover:bg-ink/5 transition-colors">
+            <button onClick={openSummaryModal} className="flex shrink-0 items-center gap-2 rounded-lg border border-ink/15 px-3 py-2 text-sm font-medium hover:bg-ink/5 transition-colors">
               <FileText className="h-4 w-4" strokeWidth={2} /> Share summary
             </button>
           </div>
 
           {/* Join info */}
-          <div className="mx-4 mb-4 rounded-xl bg-moss/10 border border-moss/20 p-3 text-sm text-ink/70">
+          <div className="mx-3 mb-3 rounded-xl bg-moss/10 border border-moss/20 p-3 text-xs text-ink/70 sm:mx-4 sm:mb-4 sm:text-sm">
             <span className="font-medium text-ink">Room ID:</span>{' '}
-            <span className="font-mono">{roomId}</span>
-            <span className="ml-2 text-ink/50">— share this to invite friends</span>
+            <span className="break-all font-mono">{roomId}</span>
+            <span className="block text-ink/50 sm:ml-2 sm:inline">share this to invite friends</span>
           </div>
         </div>
 
         {/* RIGHT — Text Chat */}
-        <div className="flex flex-col w-2/5 bg-white">
+        <div className="flex min-h-[460px] flex-1 flex-col bg-white md:h-full md:min-h-0 md:w-2/5">
           <div className="border-b border-ink/10 px-4 py-3 font-display font-medium text-sm text-ink/70">Chat</div>
 
-          <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+          <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3 sm:px-4">
             {messages.length === 0 && (
               <p className="text-center text-xs text-ink/30 pt-8">No messages yet. Say hello!</p>
             )}
@@ -344,11 +345,11 @@ export default function RoomPage() {
                 <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
                   {!isMe && <span className="text-xs text-ink/40 mb-1 ml-1">{msg.username}</span>}
                   {msg.type === 'text' ? (
-                    <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${isMe ? 'bg-moss text-white rounded-tr-sm' : 'bg-ink/5 text-ink rounded-tl-sm'}`}>
+                    <div className={`max-w-[88%] break-words rounded-2xl px-3 py-2 text-sm md:max-w-[80%] ${isMe ? 'bg-moss text-white rounded-tr-sm' : 'bg-ink/5 text-ink rounded-tl-sm'}`}>
                       {msg.text}
                     </div>
                   ) : (
-                    <div className={`max-w-[90%] rounded-xl border p-3 text-sm ${msg.type === 'note' ? 'border-clay/30 bg-clay/5' : 'border-moss/30 bg-moss/5'}`}>
+                    <div className={`max-w-[92%] break-words rounded-xl border p-3 text-sm md:max-w-[90%] ${msg.type === 'note' ? 'border-clay/30 bg-clay/5' : 'border-moss/30 bg-moss/5'}`}>
                       <div className="flex items-center gap-2 mb-1 font-medium text-xs text-ink/60">
                         {msg.type === 'note' ? <NotebookPen className="h-3 w-3" strokeWidth={2} /> : <FileText className="h-3 w-3" strokeWidth={2} />}
                         {msg.noteTitle ?? (msg.type === 'note' ? 'Note' : 'Summary')}
@@ -364,7 +365,7 @@ export default function RoomPage() {
             <div ref={chatBottomRef} />
           </div>
 
-          <div className="border-t border-ink/10 p-3 flex gap-2">
+          <div className="flex gap-2 border-t border-ink/10 p-3">
             <input
               value={chatText}
               onChange={e => setChatText(e.target.value)}
